@@ -1,0 +1,57 @@
+inherit qt5-qmake
+
+NAME="qt5-scxml"
+VERSION=5.9.2
+RELEASE=1
+CATEGORY="Libs"
+SUMMARY="Qt C++ application framework (SCXML library)"
+DESCRIPTION="Qt is a cross-platform application framework for desktop and
+embedded development. Qt enables programmers to create advanced GUI
+applications once and deploy them to Windows, Mac OS X and Linux without
+rewriting the source code. Companies using Qt can leverage software
+investments made on one platform across many others."
+HOMEPAGE="https://www.qt.io/"
+SRC_URI="http://download.qt.io/official_releases/qt/${VERSION%.*}/${VERSION}/submodules/qtscxml-opensource-src-${VERSION}.tar.xz"
+SRC_DIR="qtscxml-opensource-src-${VERSION}"
+
+PKG_NAMES="libQt5Scxml5 libQt5Scxml-devel ${NAME}-doc ${NAME}-examples"
+libQt5Scxml5_CONTENTS="
+	usr/bin/cygQt5Scxml-5.dll
+	usr/lib/qt5/qml/QtScxml/
+	usr/share/doc/
+"
+libQt5Scxml_devel_CONTENTS="
+	usr/bin/qscxmlc-qt5
+	usr/include/qt5/QtScxml/
+	usr/lib/cmake/Qt5Scxml/
+	usr/lib/libQt5Scxml.*
+	usr/lib/pkgconfig/Qt5Scxml.pc
+	usr/lib/qt5/bin/qscxmlc.exe
+	usr/lib/qt5/mkspecs/features/qscxmlc.prf
+	usr/lib/qt5/mkspecs/modules/qt_lib_scxml.pri
+	usr/lib/qt5/mkspecs/modules/qt_lib_scxml_private.pri
+"
+qt5_scxml_doc_CATEGORY="X11"
+qt5_scxml_doc_CONTENTS="usr/share/qt5/doc/qtscxml*"
+qt5_scxml_examples_CATEGORY="X11"
+qt5_scxml_examples_CONTENTS="usr/lib/qt5/examples/scxml/"
+
+DIFF_EXCLUDES="tests"
+
+src_compile() {
+	cd ${B}
+	cygqmake5 ${S}
+	cygmake
+	cygmake docs
+}
+
+src_install() {
+	cd ${B}
+	qt5_qmake_install install_docs
+
+	for x in ${D}/usr/lib/qt5/bin/*.exe
+	do
+		xname=$(basename $x .exe)
+		dosym ../lib/qt5/bin/${xname}.exe /usr/bin/${xname}-qt5
+	done
+}
